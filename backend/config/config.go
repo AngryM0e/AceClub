@@ -1,26 +1,64 @@
 package config
 
 import (
+	"fmt"
+	"log"
 	"os"
 	"time"
 
-	"github.com/AngryM0e/AceClub/Backend/internal/transport/server"
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	Server server.Config
+	Server ServerConfig
+	DB     DBConfig
+}
+
+type ServerConfig struct {
+	Port         string // API_PORT for server
+	ReadTimeout  time.Duration
+	WriteTimeout time.Duration
+}
+
+type DBConfig struct {
+	User     string
+	Password string
+	Host     string
+	Port     string
+	Name     string
 }
 
 func New() (*Config, error) {
-	godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Info: .env file not found, using system enviroment variables")
+	}
 	port := os.Getenv("PORT")
-
+	dbUser := os.Getenv("DBUSER")
+	dbPass := os.Getenv("DBPASSWORD")
+	dbHost := os.Getenv("DBHOST")
+	dbPort := os.Getenv("DBPORT")
+	dbName := os.Getenv("DBNAME")
+	readTO := time.Duration(10 * time.Second)
+	writeTO := time.Duration(5 * time.Second)
 	return &Config{
-		Server: server.Config{
+		Server: ServerConfig{
 			Port:         port,
-			ReadTimeout:  10 * time.Second,
-			WriteTimeout: 5 * time.Second,
+			ReadTimeout:  readTO,
+			WriteTimeout: writeTO,
+		},
+		DB: DBConfig{
+			User:     dbUser,
+			Password: dbPass,
+			Host:     dbHost,
+			Port:     dbPort,
+			Name:     dbName,
 		},
 	}, nil
+}
+
+func (c Config) ConnStr() string {
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		c.DB.User, c.DB.Password, c.DB.Host, c.DB.Port, c.DB.Name)
+	return connStr
 }
