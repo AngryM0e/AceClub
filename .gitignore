@@ -1,1 +1,66 @@
+# Binaries
+/bin/
+/dist/
+/*.exe
+/*.exe~
+/*.dll
+/*.so
+/*.dylib
+/ace-club
+/cmd/app/app
+
+# Test binary
+*.test
+
+# Output of go coverage
+*.out
+*.cov
+coverage.html
+
+# Dependency directories
+/vendor/
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Environment variables
 .env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Docker
+/docker-data/
+/postgres-data/
+
+# Logs
+*.log
+/logs/
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Migrations temp files
+*.tmp
+
+# SSL certificates
+*.pem
+*.crt
+*.key
+
+# Makefile artifacts
+*.d
+
+# Build artifacts
+/tmp
+/temp
