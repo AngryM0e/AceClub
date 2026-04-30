@@ -7,6 +7,8 @@ import (
 
 	"github.com/AngryM0e/AceClub/Backend/config"
 	"github.com/AngryM0e/AceClub/Backend/internal/repository/postgres"
+	"github.com/AngryM0e/AceClub/Backend/internal/service"
+	"github.com/AngryM0e/AceClub/Backend/internal/service/hasher"
 	"github.com/AngryM0e/AceClub/Backend/internal/transport/handlers"
 	"github.com/AngryM0e/AceClub/Backend/internal/transport/middleware"
 )
@@ -23,7 +25,9 @@ func New(cfg *config.Config) (*Server, error) {
 	}
 
 	userRepo := postgres.NewUserRepository(db.DB)
-	userHandler := handlers.NewUserHandler(userRepo)
+	hasher, err := hasher.NewBcryptHasher(cfg.BCryptCost)
+	userService := service.NewUserService(userRepo, hasher)
+	userHandler := handlers.NewUserHandler(userService)
 
 	mux := http.NewServeMux()
 	srv := &Server{

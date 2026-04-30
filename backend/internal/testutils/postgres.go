@@ -1,4 +1,4 @@
-package testutil
+package testutils
 
 import (
 	"context"
@@ -20,13 +20,14 @@ type TestContainer struct {
 	ConnStr   string
 }
 
-func SetupTest(t *testing.T, ctx context.Context) (*sql.DB, func(), func()) {
+func SetupTest(t *testing.T, migrationPath string) (context.Context, *sql.DB, func(), func()) {
+	ctx := context.Background()
 	tc := SetupTestContainer(t, ctx)
 
 	db, err := sql.Open("postgres", tc.ConnStr)
 	require.NoError(t, err)
 
-	tc.RunMigrations(t, "../../../migrations")
+	tc.RunMigrations(t, migrationPath)
 
 	cleanupData := func() {
 		_, err := db.Exec("TRUNCATE TABLE users CASCADE")
@@ -40,7 +41,7 @@ func SetupTest(t *testing.T, ctx context.Context) (*sql.DB, func(), func()) {
 		tc.Cleanup(t)
 	}
 
-	return db, cleanupData, fullCleanup
+	return ctx, db, cleanupData, fullCleanup
 }
 
 func SetupTestContainer(t *testing.T, ctx context.Context) *TestContainer {
@@ -50,8 +51,8 @@ func SetupTestContainer(t *testing.T, ctx context.Context) *TestContainer {
 		postgres.WithUsername("testuser"),
 		postgres.WithPassword("testpass"),
 		testcontainers.WithWaitStrategy(
-			wait.ForLog("database system is ready to accept connections").
-				WithOccurrence(2).WithStartupTimeout(5*time.Second)),
+			wait.ForListeningPort("5432/tcp").
+				WithStartupTimeout(60*time.Second)),
 	)
 	if err != nil {
 		t.Fatal(err)

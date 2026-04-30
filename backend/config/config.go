@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	Server ServerConfig
-	DB     DBConfig
+	Server     ServerConfig
+	DB         DBConfig
+	BCryptCost int
 }
 
 type ServerConfig struct {
@@ -41,6 +43,10 @@ func New() (*Config, error) {
 	dbName := os.Getenv("DBNAME")
 	readTO := time.Duration(10 * time.Second)
 	writeTO := time.Duration(5 * time.Second)
+	BCryptCost, err := strconv.Atoi(os.Getenv("BCRYPT_COST"))
+	if err != nil {
+		return nil, err
+	}
 	return &Config{
 		Server: ServerConfig{
 			Port:         port,
@@ -54,6 +60,7 @@ func New() (*Config, error) {
 			Port:     dbPort,
 			Name:     dbName,
 		},
+		BCryptCost: BCryptCost,
 	}, nil
 }
 

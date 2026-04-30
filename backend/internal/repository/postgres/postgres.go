@@ -3,11 +3,13 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/AngryM0e/AceClub/Backend/config"
 
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 )
 
@@ -38,4 +40,12 @@ func (p *PostgresDB) Close() error {
 
 func (p *PostgresDB) Ping(ctx context.Context) error {
 	return p.DB.PingContext(ctx)
+}
+
+func isDuplicateKeyError(err error) bool {
+	var pgErr *pq.Error
+	if errors.As(err, &pgErr) {
+		return pgErr.Code == "23505"
+	}
+	return false
 }
